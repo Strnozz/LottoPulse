@@ -1,2 +1,0 @@
-# LottoPulse
-lottopulse-privacy
