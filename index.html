@@ -1,0 +1,556 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0a0a0d">
+  <title>LottoPulse — Statistiche SuperEnalotto ed EuroJackpot</title>
+  <meta name="description" content="LottoPulse raccoglie in un popup le statistiche storiche di SuperEnalotto ed EuroJackpot: Hot 100, Jackpot 100 e numeri dormienti.">
+  <link rel="icon" href="assets/lottopulse-icon.webp">
+  <style>
+    :root{
+      --bg:#09090b;
+      --bg-2:#0d0d10;
+      --panel:#111116;
+      --panel-2:#15151b;
+      --stroke:#282832;
+      --stroke-soft:#1c1c23;
+      --text:#f5f5f7;
+      --muted:#aaaeba;
+      --muted-2:#7f8491;
+      --orange:#ff7a45;
+      --orange-2:#f39a68;
+      --amber:#d6aa48;
+      --blue:#7c8cff;
+      --green:#61d6a7;
+      --shadow:0 24px 80px rgba(0,0,0,.42);
+    }
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{
+      margin:0;
+      color:var(--text);
+      background:
+        radial-gradient(900px 500px at 85% -5%, rgba(255,122,69,.08), transparent 62%),
+        radial-gradient(800px 500px at -5% 20%, rgba(124,140,255,.05), transparent 64%),
+        var(--bg);
+      font-family:Inter,ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+      -webkit-font-smoothing:antialiased;
+      line-height:1.5;
+    }
+    a{color:inherit;text-decoration:none}
+    button{font:inherit}
+    .container{width:min(1160px,calc(100% - 40px));margin:auto}
+
+    nav{
+      position:sticky;top:0;z-index:50;
+      backdrop-filter:blur(18px);
+      background:rgba(9,9,11,.78);
+      border-bottom:1px solid rgba(255,255,255,.055);
+    }
+    .nav-inner{
+      min-height:68px;display:flex;align-items:center;justify-content:space-between;gap:20px;
+    }
+    .brand{display:flex;align-items:center;gap:11px;font-weight:760;letter-spacing:-.03em}
+    .brand img{width:34px;height:34px;border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.28)}
+    .brand-name{font-size:18px}
+    .nav-right{display:flex;align-items:center;gap:10px}
+    .lang{
+      appearance:none;border:1px solid var(--stroke);background:#111116;color:#d9dbe3;
+      border-radius:10px;padding:9px 28px 9px 11px;font-size:12px;font-weight:700;outline:none;
+    }
+    .nav-link{font-size:13px;color:#c4c7d0;padding:8px 6px}
+    .nav-link:hover{color:#fff}
+
+    .btn{
+      border:1px solid transparent;border-radius:11px;padding:11px 16px;
+      display:inline-flex;align-items:center;justify-content:center;gap:8px;
+      font-size:13px;font-weight:760;cursor:pointer;transition:.18s ease;
+    }
+    .btn-primary{
+      background:linear-gradient(180deg,#ff8554,#ef6e3d);
+      color:#16100d;box-shadow:0 10px 28px rgba(255,122,69,.18);
+    }
+    .btn-primary:hover{transform:translateY(-1px);filter:brightness(1.05)}
+    .btn-secondary{border-color:var(--stroke);background:#111116;color:#e7e8ec}
+    .btn-secondary:hover{background:#17171d;border-color:#363641}
+
+    .hero{padding:82px 0 54px}
+    .hero-grid{
+      display:grid;grid-template-columns:minmax(0,1.02fr) minmax(360px,.78fr);
+      align-items:center;gap:70px;
+    }
+    .kicker{
+      display:inline-flex;align-items:center;gap:8px;
+      border:1px solid var(--stroke);border-radius:99px;padding:7px 10px;
+      color:#c5c8d1;font-size:11px;font-weight:750;letter-spacing:.04em;text-transform:uppercase;
+      background:rgba(18,18,23,.75);
+    }
+    .dot{width:6px;height:6px;border-radius:50%;background:var(--green);box-shadow:0 0 0 4px rgba(97,214,167,.08)}
+    h1{
+      font-size:clamp(46px,6vw,76px);line-height:.98;letter-spacing:-.065em;
+      margin:24px 0 24px;max-width:760px;
+    }
+    .accent{color:var(--orange)}
+    .hero-copy{max-width:650px;color:var(--muted);font-size:18px;line-height:1.65}
+    .hero-actions{display:flex;gap:10px;flex-wrap:wrap;margin:30px 0 17px}
+    .micro{color:var(--muted-2);font-size:12px}
+    .price-line{display:flex;gap:14px;align-items:center;margin-top:25px;flex-wrap:wrap}
+    .price{font-size:30px;font-weight:820;letter-spacing:-.045em}
+    .price small{font-size:12px;color:var(--muted);font-weight:600;letter-spacing:0;margin-left:6px}
+    .pill{padding:6px 9px;border:1px solid var(--stroke);border-radius:99px;color:#afb3bf;font-size:11px}
+
+    .visual-wrap{position:relative;display:flex;justify-content:center}
+    .glow{
+      position:absolute;width:70%;height:75%;top:10%;left:20%;border-radius:50%;
+      background:rgba(255,122,69,.08);filter:blur(70px);pointer-events:none;
+    }
+    .product-shell{
+      position:relative;width:min(410px,100%);
+      padding:10px;border-radius:30px;
+      background:linear-gradient(150deg,#292933,#121217 35%,#0d0d11 100%);
+      border:1px solid #30303a;
+      box-shadow:var(--shadow);
+      transform:rotate(1.5deg);
+    }
+    .product-shell::before{
+      content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;
+      box-shadow:inset 0 1px rgba(255,255,255,.07);
+    }
+    .product-shell img{width:100%;display:block;border-radius:23px}
+
+    .trust{
+      margin-top:42px;display:grid;grid-template-columns:repeat(4,1fr);
+      border:1px solid var(--stroke-soft);background:rgba(15,15,19,.76);border-radius:16px;
+    }
+    .trust-item{padding:18px 20px;border-right:1px solid var(--stroke-soft)}
+    .trust-item:last-child{border-right:0}
+    .trust strong{display:block;font-size:13px;margin-bottom:4px}
+    .trust span{font-size:11px;color:var(--muted-2)}
+
+    section{padding:80px 0}
+    .section-eyebrow{color:var(--orange);font-size:11px;font-weight:800;letter-spacing:.13em;text-transform:uppercase}
+    .section-title{font-size:clamp(32px,4vw,48px);line-height:1.05;letter-spacing:-.045em;margin:10px 0 12px}
+    .section-copy{color:var(--muted);max-width:680px;font-size:16px}
+
+    .features{
+      display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:34px;
+    }
+    .feature{
+      min-height:220px;padding:24px;border:1px solid var(--stroke);border-radius:18px;
+      background:linear-gradient(180deg,rgba(20,20,26,.92),rgba(14,14,18,.92));
+    }
+    .feature-icon{
+      width:40px;height:40px;border-radius:11px;display:grid;place-items:center;margin-bottom:32px;
+      font-weight:900;font-size:17px;
+    }
+    .hot{background:rgba(255,122,69,.11);color:var(--orange);border:1px solid rgba(255,122,69,.25)}
+    .jackpot{background:rgba(214,170,72,.11);color:var(--amber);border:1px solid rgba(214,170,72,.25)}
+    .cold{background:rgba(124,140,255,.11);color:var(--blue);border:1px solid rgba(124,140,255,.25)}
+    .feature h3{font-size:18px;margin:0 0 9px;letter-spacing:-.02em}
+    .feature p{margin:0;color:var(--muted);font-size:13px;line-height:1.65}
+
+    .split{
+      display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:34px;
+    }
+    .info-card{
+      padding:28px;border:1px solid var(--stroke);border-radius:18px;background:#101014;
+    }
+    .info-card h3{font-size:22px;margin:0 0 9px;letter-spacing:-.035em}
+    .info-card p{color:var(--muted);margin:0;font-size:14px;line-height:1.7}
+    .info-card .mini-list{display:grid;gap:9px;margin-top:22px}
+    .mini-row{display:flex;gap:10px;align-items:center;color:#d2d4dc;font-size:13px}
+    .check{
+      width:19px;height:19px;border-radius:50%;display:grid;place-items:center;
+      background:rgba(97,214,167,.1);color:var(--green);font-size:11px;border:1px solid rgba(97,214,167,.2)
+    }
+
+    .pricing{
+      position:relative;overflow:hidden;
+      padding:36px;border-radius:22px;border:1px solid #34343f;
+      background:
+        radial-gradient(500px 250px at 0 0,rgba(255,122,69,.09),transparent 72%),
+        linear-gradient(180deg,#15151b,#101014);
+      display:grid;grid-template-columns:1fr auto;gap:30px;align-items:center;
+    }
+    .pricing h2{font-size:36px;margin:6px 0 10px;letter-spacing:-.045em}
+    .pricing p{color:var(--muted);margin:0;max-width:650px}
+    .price-box{text-align:right;min-width:220px}\n    #purchase{scroll-margin-top:110px}
+    .price-big{font-size:48px;font-weight:850;letter-spacing:-.06em;line-height:1}
+    .price-note{font-size:11px;color:var(--muted-2);margin:8px 0 16px}
+
+    .faq{margin-top:32px;border-top:1px solid var(--stroke-soft)}
+    details{border-bottom:1px solid var(--stroke-soft);padding:18px 0}
+    summary{cursor:pointer;font-weight:690;list-style:none}
+    summary::-webkit-details-marker{display:none}
+    details p{color:var(--muted);font-size:13px;max-width:760px;margin:10px 0 0;line-height:1.7}
+
+    footer{padding:36px 0 50px;border-top:1px solid var(--stroke-soft);color:var(--muted-2)}
+    .footer-grid{display:flex;justify-content:space-between;gap:30px;align-items:flex-start}
+    .footer-brand{display:flex;align-items:center;gap:9px;color:#d6d8df;font-weight:720}
+    .footer-brand img{width:26px;height:26px;border-radius:8px}
+    .footer-copy{font-size:11px;max-width:520px;margin-top:10px;line-height:1.6}
+    .footer-links{display:flex;gap:16px;font-size:12px}
+    .footer-links a:hover{color:#fff}
+
+    @media(max-width:900px){
+      .hero{padding-top:52px}
+      .hero-grid{grid-template-columns:1fr;gap:48px}
+      .visual-wrap{order:-1}
+      .product-shell{width:min(360px,88vw)}
+      .trust{grid-template-columns:repeat(2,1fr)}
+      .trust-item:nth-child(2){border-right:0}
+      .trust-item:nth-child(-n+2){border-bottom:1px solid var(--stroke-soft)}
+      .features{grid-template-columns:1fr}
+      .split{grid-template-columns:1fr}
+      .pricing{grid-template-columns:1fr}
+      .price-box{text-align:left}
+    }
+    @media(max-width:620px){
+      .container{width:min(100% - 28px,1160px)}
+      .nav-link{display:none}
+      .nav-inner{min-height:62px}
+      .hero{padding-top:38px}
+      h1{font-size:46px}
+      .hero-copy{font-size:16px}
+      .trust{grid-template-columns:1fr}
+      .trust-item{border-right:0!important;border-bottom:1px solid var(--stroke-soft)!important}
+      .trust-item:last-child{border-bottom:0!important}
+      section{padding:58px 0}
+      .pricing{padding:26px}
+      .footer-grid{flex-direction:column}
+      .footer-links{flex-wrap:wrap}
+    }
+  </style>
+</head>
+<body>
+  <nav>
+    <div class="container nav-inner">
+      <a class="brand" href="#">
+        <img src="assets/lottopulse-icon.webp" alt="LottoPulse">
+        <span class="brand-name">LottoPulse</span>
+      </a>
+      <div class="nav-right">
+        <a class="nav-link" href="#features" data-t="navFeatures">Funzioni</a>
+        <a class="nav-link" href="#faq" data-t="navFaq">FAQ</a>
+        <select class="lang" id="lang" aria-label="Lingua">
+          <option value="it">IT</option>
+          <option value="en">EN</option>
+          <option value="de">DE</option>
+          <option value="es">ES</option>
+          <option value="fr">FR</option>
+        </select>
+        <a class="btn btn-primary" href="#pricing" data-t="navBuy">Ottieni LottoPulse</a>
+      </div>
+    </div>
+  </nav>
+
+  <main>
+    <header class="hero">
+      <div class="container">
+        <div class="hero-grid">
+          <div>
+            <div class="kicker"><span class="dot"></span><span data-t="kicker">Statistiche storiche, subito</span></div>
+            <h1 data-t-html="heroTitle">I numeri che vuoi controllare.<br><span class="accent">A colpo d'occhio.</span></h1>
+            <p class="hero-copy" data-t="heroCopy">
+              Hot 100, Jackpot 100 e numeri dormienti per SuperEnalotto ed EuroJackpot, raccolti in un popup semplice e veloce.
+            </p>
+            <div class="hero-actions">
+              <!-- Il CTA hero porta al pulsante di acquisto. Collega #purchase al checkout reale quando lo hai. -->
+              <a class="btn btn-primary" href="#purchase" data-t="buyCta">Acquista · 1,99 €</a>
+              <!-- Sostituisci #chrome con l'URL pubblico del Chrome Web Store -->
+              <a class="btn btn-secondary" href="https://chromewebstore.google.com/detail/lottopulse/iohmpiampekjmbgnghdcdmflpkhjbial" target="_blank" rel="noopener" data-t="storeCta">Chrome Web Store</a>
+            </div>
+            <div class="micro" data-t="heroMicro">Pagamento una tantum · nessun abbonamento</div>
+            <div class="price-line">
+              <div class="price">1,99 € <small data-t="once">una volta sola</small></div>
+              <span class="pill" data-t="zeroBackend">Nessun account richiesto</span>
+              <span class="pill" data-t="languages">5 lingue</span>
+            </div>
+          </div>
+
+          <div class="visual-wrap">
+            <div class="glow"></div>
+            <div class="product-shell">
+              <img src="assets/popup.webp" alt="Popup LottoPulse con statistiche SuperEnalotto">
+            </div>
+          </div>
+        </div>
+
+        <div class="trust">
+          <div class="trust-item"><strong data-t="trust1a">SuperEnalotto</strong><span data-t="trust1b">6 numeri + Jolly + SuperStar</span></div>
+          <div class="trust-item"><strong data-t="trust2a">EuroJackpot</strong><span data-t="trust2b">5 numeri + 2 Euronumeri</span></div>
+          <div class="trust-item"><strong data-t="trust3a">Calcolo locale</strong><span data-t="trust3b">Nessun backend LottoPulse</span></div>
+          <div class="trust-item"><strong data-t="trust4a">Multilingua</strong><span>IT · EN · DE · ES · FR</span></div>
+        </div>
+      </div>
+    </header>
+
+    <section id="features">
+      <div class="container">
+        <div class="section-eyebrow" data-t="featuresEyebrow">Dentro LottoPulse</div>
+        <h2 class="section-title" data-t="featuresTitle">Tre statistiche. Zero confusione.</h2>
+        <p class="section-copy" data-t="featuresCopy">Apri il popup, scegli il gioco e trovi subito ciò che ti interessa.</p>
+
+        <div class="features">
+          <article class="feature">
+            <div class="feature-icon hot">↗</div>
+            <h3 data-t="hotTitle">Hot · ultime 100 estrazioni</h3>
+            <p data-t="hotCopy">Mostra i numeri più frequenti nelle ultime 100 estrazioni, con la relativa percentuale di presenza.</p>
+          </article>
+          <article class="feature">
+            <div class="feature-icon jackpot">◆</div>
+            <h3 data-t="jackpotTitle">Hot · ultimi 100 Jackpot</h3>
+            <p data-t="jackpotCopy">Considera solo i concorsi in cui il Jackpot è stato centrato e mostra i numeri più ricorrenti.</p>
+          </article>
+          <article class="feature">
+            <div class="feature-icon cold">↓</div>
+            <h3 data-t="dormantTitle">Numeri dormienti</h3>
+            <p data-t="dormantCopy">Evidenzia i numeri assenti da più concorsi nella finestra delle ultime 100 estrazioni.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="container">
+        <div class="section-eyebrow" data-t="simpleEyebrow">Pensato per essere stupido semplice</div>
+        <h2 class="section-title" data-t="simpleTitle">Apri. Guarda. Chiudi.</h2>
+        <p class="section-copy" data-t="simpleCopy">Niente dashboard infinite, niente account, niente notifiche invadenti.</p>
+
+        <div class="split">
+          <div class="info-card">
+            <h3 data-t="localTitle">I calcoli avvengono nel browser.</h3>
+            <p data-t="localCopy">LottoPulse scarica dati pubblici, li elabora localmente e conserva una cache sul dispositivo per essere rapido anche al riavvio.</p>
+            <div class="mini-list">
+              <div class="mini-row"><span class="check">✓</span><span data-t="local1">Nessun profilo utente</span></div>
+              <div class="mini-row"><span class="check">✓</span><span data-t="local2">Nessuna cronologia di navigazione raccolta</span></div>
+              <div class="mini-row"><span class="check">✓</span><span data-t="local3">Nessun server LottoPulse necessario</span></div>
+            </div>
+          </div>
+          <div class="info-card">
+            <h3 data-t="langTitle">Pronta anche fuori dall'Italia.</h3>
+            <p data-t="langCopy">L'interfaccia è disponibile in italiano, inglese, tedesco, spagnolo e francese. La lingua viene rilevata automaticamente e può essere cambiata dal popup.</p>
+            <div class="mini-list">
+              <div class="mini-row"><span class="check">✓</span><span>Italiano</span></div>
+              <div class="mini-row"><span class="check">✓</span><span>English · Deutsch · Español · Français</span></div>
+              <div class="mini-row"><span class="check">✓</span><span data-t="lang3">Chrome / browser Chromium · Safari in preparazione</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="pricing">
+      <div class="container">
+        <div class="pricing">
+          <div>
+            <div class="section-eyebrow" data-t="pricingEyebrow">Prezzo semplice</div>
+            <h2 data-t="pricingTitle">Costa meno di un caffè.</h2>
+            <p data-t="pricingCopy">Un unico pagamento. Nessun rinnovo automatico, nessun piano mensile e nessun account da ricordare.</p>
+          </div>
+          <div class="price-box">
+            <div class="price-big">1,99 €</div>
+            <div class="price-note" data-t="pricingNote">pagamento una tantum</div>
+            <!-- Collega qui il checkout reale -->
+            <a id="purchase" class="btn btn-primary" href="#purchase" data-t="pricingCta">Acquista LottoPulse</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="faq">
+      <div class="container">
+        <div class="section-eyebrow">FAQ</div>
+        <h2 class="section-title" data-t="faqTitle">Domande veloci.</h2>
+        <div class="faq">
+          <details>
+            <summary data-t="q1">LottoPulse prevede i numeri vincenti?</summary>
+            <p data-t="a1">No. Mostra statistiche descrittive basate su estrazioni passate. Le estrazioni sono eventi casuali e i dati storici non aumentano la probabilità di vincita.</p>
+          </details>
+          <details>
+            <summary data-t="q2">Devo creare un account?</summary>
+            <p data-t="a2">No. L'estensione funziona senza account LottoPulse. La lingua e la cache dei dati vengono salvate localmente sul dispositivo.</p>
+          </details>
+          <details>
+            <summary data-t="q3">I dati si aggiornano da soli?</summary>
+            <p data-t="a3">Sì. LottoPulse recupera periodicamente le fonti pubbliche e mantiene l'ultima cache valida se una fonte è temporaneamente irraggiungibile.</p>
+          </details>
+          <details>
+            <summary data-t="q4">È affiliata con SuperEnalotto o EuroJackpot?</summary>
+            <p data-t="a4">No. LottoPulse è uno strumento statistico indipendente e non è affiliato con gli operatori delle lotterie o con ADM.</p>
+          </details>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="container footer-grid">
+      <div>
+        <div class="footer-brand"><img src="assets/lottopulse-icon.webp" alt=""><span>LottoPulse</span></div>
+        <div class="footer-copy" data-t="footerCopy">
+          LottoPulse è uno strumento statistico indipendente. Non vende biglietti, non piazza giocate e non promette di aumentare le probabilità di vincita.
+        </div>
+      </div>
+      <div class="footer-links">
+        <a href="privacy/" data-t="privacy">Privacy</a>
+        <a href="#features" data-t="navFeatures">Funzioni</a>
+        <a href="#faq">FAQ</a>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+  const copy = {
+    it:{
+      navFeatures:"Funzioni",navFaq:"FAQ",navBuy:"Ottieni LottoPulse",kicker:"Statistiche storiche, subito",
+      heroTitle:'I numeri che vuoi controllare.<br><span class="accent">A colpo d\\'occhio.</span>',
+      heroCopy:"Hot 100, Jackpot 100 e numeri dormienti per SuperEnalotto ed EuroJackpot, raccolti in un popup semplice e veloce.",
+      buyCta:"Acquista · 1,99 €",storeCta:"Chrome Web Store",heroMicro:"Pagamento una tantum · nessun abbonamento",
+      once:"una volta sola",zeroBackend:"Nessun account richiesto",languages:"5 lingue",
+      trust1a:"SuperEnalotto",trust1b:"6 numeri + Jolly + SuperStar",trust2a:"EuroJackpot",trust2b:"5 numeri + 2 Euronumeri",
+      trust3a:"Calcolo locale",trust3b:"Nessun backend LottoPulse",trust4a:"Multilingua",
+      featuresEyebrow:"Dentro LottoPulse",featuresTitle:"Tre statistiche. Zero confusione.",featuresCopy:"Apri il popup, scegli il gioco e trovi subito ciò che ti interessa.",
+      hotTitle:"Hot · ultime 100 estrazioni",hotCopy:"Mostra i numeri più frequenti nelle ultime 100 estrazioni, con la relativa percentuale di presenza.",
+      jackpotTitle:"Hot · ultimi 100 Jackpot",jackpotCopy:"Considera solo i concorsi in cui il Jackpot è stato centrato e mostra i numeri più ricorrenti.",
+      dormantTitle:"Numeri dormienti",dormantCopy:"Evidenzia i numeri assenti da più concorsi nella finestra delle ultime 100 estrazioni.",
+      simpleEyebrow:"Pensato per essere stupido semplice",simpleTitle:"Apri. Guarda. Chiudi.",simpleCopy:"Niente dashboard infinite, niente account, niente notifiche invadenti.",
+      localTitle:"I calcoli avvengono nel browser.",localCopy:"LottoPulse scarica dati pubblici, li elabora localmente e conserva una cache sul dispositivo per essere rapido anche al riavvio.",
+      local1:"Nessun profilo utente",local2:"Nessuna cronologia di navigazione raccolta",local3:"Nessun server LottoPulse necessario",
+      langTitle:"Pronta anche fuori dall'Italia.",langCopy:"L'interfaccia è disponibile in italiano, inglese, tedesco, spagnolo e francese. La lingua viene rilevata automaticamente e può essere cambiata dal popup.",
+      lang3:"Chrome / browser Chromium · Safari in preparazione",pricingEyebrow:"Prezzo semplice",pricingTitle:"Costa meno di un caffè.",
+      pricingCopy:"Un unico pagamento. Nessun rinnovo automatico, nessun piano mensile e nessun account da ricordare.",pricingNote:"pagamento una tantum",pricingCta:"Acquista LottoPulse",
+      faqTitle:"Domande veloci.",q1:"LottoPulse prevede i numeri vincenti?",a1:"No. Mostra statistiche descrittive basate su estrazioni passate. Le estrazioni sono eventi casuali e i dati storici non aumentano la probabilità di vincita.",
+      q2:"Devo creare un account?",a2:"No. L'estensione funziona senza account LottoPulse. La lingua e la cache dei dati vengono salvate localmente sul dispositivo.",
+      q3:"I dati si aggiornano da soli?",a3:"Sì. LottoPulse recupera periodicamente le fonti pubbliche e mantiene l'ultima cache valida se una fonte è temporaneamente irraggiungibile.",
+      q4:"È affiliata con SuperEnalotto o EuroJackpot?",a4:"No. LottoPulse è uno strumento statistico indipendente e non è affiliato con gli operatori delle lotterie o con ADM.",
+      footerCopy:"LottoPulse è uno strumento statistico indipendente. Non vende biglietti, non piazza giocate e non promette di aumentare le probabilità di vincita.",privacy:"Privacy"
+    },
+    en:{
+      navFeatures:"Features",navFaq:"FAQ",navBuy:"Get LottoPulse",kicker:"Historical stats, instantly",
+      heroTitle:'The numbers you want to check.<br><span class="accent">At a glance.</span>',
+      heroCopy:"Hot 100, Jackpot 100 and dormant-number statistics for SuperEnalotto and EuroJackpot in one simple, fast popup.",
+      buyCta:"Buy · €1.99",storeCta:"Chrome Web Store",heroMicro:"One-time payment · no subscription",
+      once:"one time",zeroBackend:"No account required",languages:"5 languages",
+      trust1a:"SuperEnalotto",trust1b:"6 numbers + Jolly + SuperStar",trust2a:"EuroJackpot",trust2b:"5 numbers + 2 Euro numbers",
+      trust3a:"Local calculation",trust3b:"No LottoPulse backend",trust4a:"Multilingual",
+      featuresEyebrow:"Inside LottoPulse",featuresTitle:"Three statistics. Zero clutter.",featuresCopy:"Open the popup, choose the game and see what matters immediately.",
+      hotTitle:"Hot · last 100 draws",hotCopy:"Shows the most frequent numbers in the latest 100 draws together with their frequency percentage.",
+      jackpotTitle:"Hot · last 100 jackpots",jackpotCopy:"Uses only jackpot-winning draws and shows the numbers that appeared most often.",
+      dormantTitle:"Dormant numbers",dormantCopy:"Highlights numbers absent for the most draws within the latest 100-draw window.",
+      simpleEyebrow:"Designed to stay ridiculously simple",simpleTitle:"Open. Check. Close.",simpleCopy:"No endless dashboards, no accounts and no annoying notifications.",
+      localTitle:"Calculations happen in your browser.",localCopy:"LottoPulse retrieves public draw data, processes it locally and stores a device-side cache for fast loading.",
+      local1:"No user profile",local2:"No browsing history collected",local3:"No LottoPulse server required",
+      langTitle:"Ready beyond Italy.",langCopy:"The interface is available in Italian, English, German, Spanish and French. Language is detected automatically and can be changed in the popup.",
+      lang3:"Chrome / Chromium browsers · Safari in preparation",pricingEyebrow:"Simple pricing",pricingTitle:"Less than a coffee.",
+      pricingCopy:"One payment. No automatic renewals, no monthly plan and no extra account to remember.",pricingNote:"one-time payment",pricingCta:"Buy LottoPulse",
+      faqTitle:"Quick questions.",q1:"Does LottoPulse predict winning numbers?",a1:"No. It displays descriptive statistics based on past draws. Lottery draws are random events and historical data does not improve the odds of winning.",
+      q2:"Do I need an account?",a2:"No. The extension works without a LottoPulse account. Language and cached draw data are stored locally on your device.",
+      q3:"Do the data update automatically?",a3:"Yes. LottoPulse periodically retrieves public sources and keeps the last valid cache if a source is temporarily unavailable.",
+      q4:"Is it affiliated with SuperEnalotto or EuroJackpot?",a4:"No. LottoPulse is an independent statistical tool and is not affiliated with lottery operators or ADM.",
+      footerCopy:"LottoPulse is an independent statistical tool. It does not sell tickets, place wagers or claim to improve winning odds.",privacy:"Privacy"
+    },
+
+    de:{
+      navFeatures:"Funktionen",navFaq:"FAQ",navBuy:"LottoPulse holen",kicker:"Historische Statistiken, sofort",
+      heroTitle:'Die Zahlen, die du prüfen willst.<br><span class="accent">Auf einen Blick.</span>',
+      heroCopy:"Hot 100, Jackpot 100 und überfällige Zahlen für SuperEnalotto und EuroJackpot in einem einfachen, schnellen Popup.",
+      buyCta:"Kaufen · 1,99 €",storeCta:"Chrome Web Store",heroMicro:"Einmalige Zahlung · kein Abo",
+      once:"einmalig",zeroBackend:"Kein Konto erforderlich",languages:"5 Sprachen",
+      trust1a:"SuperEnalotto",trust1b:"6 Zahlen + Jolly + SuperStar",trust2a:"EuroJackpot",trust2b:"5 Zahlen + 2 Eurozahlen",
+      trust3a:"Lokale Berechnung",trust3b:"Kein LottoPulse-Backend",trust4a:"Mehrsprachig",
+      featuresEyebrow:"In LottoPulse",featuresTitle:"Drei Statistiken. Kein Durcheinander.",featuresCopy:"Popup öffnen, Spiel wählen und sofort sehen, was zählt.",
+      hotTitle:"Hot · letzte 100 Ziehungen",hotCopy:"Zeigt die häufigsten Zahlen der letzten 100 Ziehungen inklusive ihrer Häufigkeit.",
+      jackpotTitle:"Hot · letzte 100 Jackpots",jackpotCopy:"Berücksichtigt nur Ziehungen mit geknacktem Jackpot und zeigt die am häufigsten vorkommenden Zahlen.",
+      dormantTitle:"Überfällige Zahlen",dormantCopy:"Hebt die Zahlen hervor, die innerhalb der letzten 100 Ziehungen am längsten nicht erschienen sind.",
+      simpleEyebrow:"Absichtlich extrem einfach",simpleTitle:"Öffnen. Prüfen. Schließen.",simpleCopy:"Keine endlosen Dashboards, keine Konten und keine nervigen Benachrichtigungen.",
+      localTitle:"Die Berechnung läuft im Browser.",localCopy:"LottoPulse lädt öffentliche Ziehungsdaten, verarbeitet sie lokal und speichert einen Cache auf dem Gerät.",
+      local1:"Kein Benutzerprofil",local2:"Kein Browserverlauf wird gesammelt",local3:"Kein LottoPulse-Server nötig",
+      langTitle:"Auch außerhalb Italiens bereit.",langCopy:"Die Oberfläche gibt es auf Italienisch, Englisch, Deutsch, Spanisch und Französisch. Die Sprache wird automatisch erkannt und kann im Popup geändert werden.",
+      lang3:"Chrome / Chromium-Browser · Safari in Vorbereitung",pricingEyebrow:"Einfacher Preis",pricingTitle:"Weniger als ein Kaffee.",
+      pricingCopy:"Eine Zahlung. Keine automatische Verlängerung, kein Monatsabo und kein zusätzliches Konto.",pricingNote:"einmalige Zahlung",pricingCta:"LottoPulse kaufen",
+      faqTitle:"Kurze Fragen.",q1:"Sagt LottoPulse Gewinnzahlen voraus?",a1:"Nein. Es zeigt beschreibende Statistiken vergangener Ziehungen. Lotterieziehungen sind Zufallsereignisse und historische Daten erhöhen die Gewinnchance nicht.",
+      q2:"Brauche ich ein Konto?",a2:"Nein. Die Erweiterung funktioniert ohne LottoPulse-Konto. Sprache und Cache werden lokal auf deinem Gerät gespeichert.",
+      q3:"Werden die Daten automatisch aktualisiert?",a3:"Ja. LottoPulse ruft regelmäßig öffentliche Quellen ab und behält bei einem vorübergehenden Ausfall den letzten gültigen Cache.",
+      q4:"Ist LottoPulse mit SuperEnalotto oder EuroJackpot verbunden?",a4:"Nein. LottoPulse ist ein unabhängiges Statistik-Tool und nicht mit Lotteriebetreibern oder ADM verbunden.",
+      footerCopy:"LottoPulse ist ein unabhängiges Statistik-Tool. Es verkauft keine Tickets, platziert keine Wetten und verspricht keine höheren Gewinnchancen.",privacy:"Datenschutz"
+    },
+    es:{
+      navFeatures:"Funciones",navFaq:"FAQ",navBuy:"Obtener LottoPulse",kicker:"Estadísticas históricas, al instante",
+      heroTitle:'Los números que quieres comprobar.<br><span class="accent">De un vistazo.</span>',
+      heroCopy:"Hot 100, Jackpot 100 y números atrasados de SuperEnalotto y EuroJackpot en un popup sencillo y rápido.",
+      buyCta:"Comprar · 1,99 €",storeCta:"Chrome Web Store",heroMicro:"Pago único · sin suscripción",
+      once:"una sola vez",zeroBackend:"Sin cuenta obligatoria",languages:"5 idiomas",
+      trust1a:"SuperEnalotto",trust1b:"6 números + Jolly + SuperStar",trust2a:"EuroJackpot",trust2b:"5 números + 2 Euronúmeros",
+      trust3a:"Cálculo local",trust3b:"Sin backend de LottoPulse",trust4a:"Multilingüe",
+      featuresEyebrow:"Dentro de LottoPulse",featuresTitle:"Tres estadísticas. Cero lío.",featuresCopy:"Abre el popup, elige el juego y mira directamente lo importante.",
+      hotTitle:"Hot · últimos 100 sorteos",hotCopy:"Muestra los números más frecuentes de los últimos 100 sorteos junto con su porcentaje de aparición.",
+      jackpotTitle:"Hot · últimos 100 Jackpots",jackpotCopy:"Solo usa sorteos en los que se ganó el Jackpot y muestra los números que más se repitieron.",
+      dormantTitle:"Números atrasados",dormantCopy:"Destaca los números que llevan más sorteos sin aparecer dentro de la ventana de los últimos 100 sorteos.",
+      simpleEyebrow:"Hecho para ser absurdamente simple",simpleTitle:"Abre. Mira. Cierra.",simpleCopy:"Sin paneles interminables, sin cuentas y sin notificaciones molestas.",
+      localTitle:"Los cálculos se hacen en tu navegador.",localCopy:"LottoPulse descarga datos públicos, los procesa localmente y guarda una caché en tu dispositivo para cargar rápido.",
+      local1:"Sin perfil de usuario",local2:"No recoge historial de navegación",local3:"No necesita servidor de LottoPulse",
+      langTitle:"Preparado también fuera de Italia.",langCopy:"La interfaz está disponible en italiano, inglés, alemán, español y francés. El idioma se detecta automáticamente y se puede cambiar desde el popup.",
+      lang3:"Chrome / navegadores Chromium · Safari en preparación",pricingEyebrow:"Precio simple",pricingTitle:"Menos que un café.",
+      pricingCopy:"Un solo pago. Sin renovaciones automáticas, sin plan mensual y sin otra cuenta que recordar.",pricingNote:"pago único",pricingCta:"Comprar LottoPulse",
+      faqTitle:"Preguntas rápidas.",q1:"¿LottoPulse predice números ganadores?",a1:"No. Muestra estadísticas descriptivas basadas en sorteos anteriores. Los sorteos son eventos aleatorios y los datos históricos no aumentan la probabilidad de ganar.",
+      q2:"¿Necesito una cuenta?",a2:"No. La extensión funciona sin cuenta de LottoPulse. El idioma y la caché se guardan localmente en tu dispositivo.",
+      q3:"¿Los datos se actualizan automáticamente?",a3:"Sí. LottoPulse consulta periódicamente fuentes públicas y conserva la última caché válida si una fuente no está disponible temporalmente.",
+      q4:"¿Está afiliado con SuperEnalotto o EuroJackpot?",a4:"No. LottoPulse es una herramienta estadística independiente y no está afiliada con los operadores de lotería ni con ADM.",
+      footerCopy:"LottoPulse es una herramienta estadística independiente. No vende boletos, no realiza apuestas y no afirma aumentar las probabilidades de ganar.",privacy:"Privacidad"
+    },
+    fr:{
+      navFeatures:"Fonctions",navFaq:"FAQ",navBuy:"Obtenir LottoPulse",kicker:"Statistiques historiques, immédiatement",
+      heroTitle:'Les numéros que vous voulez vérifier.<br><span class="accent">En un coup d’œil.</span>',
+      heroCopy:"Hot 100, Jackpot 100 et numéros en retard pour SuperEnalotto et EuroJackpot dans un popup simple et rapide.",
+      buyCta:"Acheter · 1,99 €",storeCta:"Chrome Web Store",heroMicro:"Paiement unique · aucun abonnement",
+      once:"une seule fois",zeroBackend:"Aucun compte requis",languages:"5 langues",
+      trust1a:"SuperEnalotto",trust1b:"6 numéros + Jolly + SuperStar",trust2a:"EuroJackpot",trust2b:"5 numéros + 2 numéros Euro",
+      trust3a:"Calcul local",trust3b:"Aucun backend LottoPulse",trust4a:"Multilingue",
+      featuresEyebrow:"Dans LottoPulse",featuresTitle:"Trois statistiques. Zéro confusion.",featuresCopy:"Ouvrez le popup, choisissez le jeu et voyez immédiatement l’essentiel.",
+      hotTitle:"Hot · 100 derniers tirages",hotCopy:"Affiche les numéros les plus fréquents des 100 derniers tirages avec leur pourcentage d’apparition.",
+      jackpotTitle:"Hot · 100 derniers Jackpots",jackpotCopy:"Utilise uniquement les tirages où le Jackpot a été remporté et affiche les numéros les plus récurrents.",
+      dormantTitle:"Numéros en retard",dormantCopy:"Met en évidence les numéros absents depuis le plus de tirages dans la fenêtre des 100 derniers tirages.",
+      simpleEyebrow:"Conçu pour rester extrêmement simple",simpleTitle:"Ouvrez. Regardez. Fermez.",simpleCopy:"Pas de tableaux de bord interminables, pas de compte et pas de notifications envahissantes.",
+      localTitle:"Les calculs se font dans votre navigateur.",localCopy:"LottoPulse récupère des données publiques, les traite localement et conserve un cache sur votre appareil pour charger rapidement.",
+      local1:"Aucun profil utilisateur",local2:"Aucun historique de navigation collecté",local3:"Aucun serveur LottoPulse requis",
+      langTitle:"Prêt aussi hors d’Italie.",langCopy:"L’interface est disponible en italien, anglais, allemand, espagnol et français. La langue est détectée automatiquement et peut être changée depuis le popup.",
+      lang3:"Chrome / navigateurs Chromium · Safari en préparation",pricingEyebrow:"Prix simple",pricingTitle:"Moins cher qu’un café.",
+      pricingCopy:"Un seul paiement. Aucun renouvellement automatique, aucun abonnement mensuel et aucun compte supplémentaire.",pricingNote:"paiement unique",pricingCta:"Acheter LottoPulse",
+      faqTitle:"Questions rapides.",q1:"LottoPulse prédit-il les numéros gagnants ?",a1:"Non. Il affiche des statistiques descriptives basées sur les tirages passés. Les tirages sont aléatoires et les données historiques n’augmentent pas les chances de gagner.",
+      q2:"Dois-je créer un compte ?",a2:"Non. L’extension fonctionne sans compte LottoPulse. La langue et le cache sont enregistrés localement sur votre appareil.",
+      q3:"Les données se mettent-elles à jour automatiquement ?",a3:"Oui. LottoPulse consulte périodiquement des sources publiques et conserve le dernier cache valide si une source est temporairement indisponible.",
+      q4:"LottoPulse est-il affilié à SuperEnalotto ou EuroJackpot ?",a4:"Non. LottoPulse est un outil statistique indépendant et n’est affilié ni aux opérateurs de loterie ni à ADM.",
+      footerCopy:"LottoPulse est un outil statistique indépendant. Il ne vend pas de billets, ne place pas de paris et ne prétend pas augmenter les chances de gagner.",privacy:"Confidentialité"
+    }
+
+  };
+
+
+
+  const select = document.getElementById("lang");
+  const supported = ["it","en","de","es","fr"];
+  const detected = (navigator.language || "en").slice(0,2).toLowerCase();
+  let current = localStorage.getItem("lp-site-lang") || (supported.includes(detected) ? detected : "en");
+
+  function applyLang(lang){
+    current = supported.includes(lang) ? lang : "en";
+    document.documentElement.lang = current;
+    select.value = current;
+    localStorage.setItem("lp-site-lang", current);
+    const dict = copy[current] || copy.en;
+    document.querySelectorAll("[data-t]").forEach(el=>{
+      const k = el.dataset.t;
+      if(dict[k]) el.textContent = dict[k];
+    });
+    document.querySelectorAll("[data-t-html]").forEach(el=>{
+      const k = el.dataset.tHtml;
+      if(dict[k]) el.innerHTML = dict[k];
+    });
+  }
+  select.addEventListener("change", e=>applyLang(e.target.value));
+  applyLang(current);
+  </script>
+</body>
+</html>
