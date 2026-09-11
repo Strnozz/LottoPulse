@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#09090b">
+  <title>Pagamento completato — LottoPulse</title>
+  <meta name="robots" content="noindex">
+  <link rel="icon" href="../assets/lottopulse-icon.webp">
+  <style>
+    :root {
+      color-scheme:dark;
+      --bg:#09090b;--panel:#111116;--stroke:#292932;--text:#f5f5f7;
+      --muted:#aeb2bf;--muted2:#7e8390;--orange:#ff7a45;--green:#61d6a7;
+    }
+    *{box-sizing:border-box}
+    html,body{margin:0;min-height:100%;background:var(--bg);color:var(--text)}
+    body{
+      min-height:100vh;display:grid;place-items:center;padding:28px;
+      font-family:Inter,ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+      -webkit-font-smoothing:antialiased;
+      background:
+        radial-gradient(650px 420px at 50% 0%,rgba(255,122,69,.10),transparent 68%),
+        radial-gradient(480px 320px at 10% 100%,rgba(124,140,255,.06),transparent 70%),
+        #09090b;
+    }
+    .card{
+      width:min(620px,100%);padding:42px;border:1px solid var(--stroke);border-radius:24px;
+      background:linear-gradient(180deg,rgba(19,19,24,.96),rgba(13,13,17,.97));
+      box-shadow:0 30px 100px rgba(0,0,0,.45);text-align:center;
+    }
+    .brand{display:flex;justify-content:center;align-items:center;gap:10px;margin-bottom:34px;font-weight:780}
+    .brand img{width:38px;height:38px;border-radius:11px}
+    .check{
+      width:64px;height:64px;border-radius:50%;margin:0 auto 22px;
+      display:grid;place-items:center;font-size:28px;font-weight:900;
+      color:var(--green);background:rgba(97,214,167,.10);border:1px solid rgba(97,214,167,.25);
+      box-shadow:0 0 0 8px rgba(97,214,167,.035);
+    }
+    h1{font-size:clamp(34px,7vw,52px);line-height:1.02;letter-spacing:-.055em;margin:0 0 15px}
+    .lead{font-size:16px;line-height:1.65;color:var(--muted);max-width:500px;margin:0 auto}
+    .actions{display:grid;gap:10px;margin:30px auto 18px;max-width:360px}
+    .btn{
+      min-height:50px;border-radius:12px;padding:12px 18px;display:flex;align-items:center;
+      justify-content:center;text-decoration:none;font-weight:780;font-size:14px;transition:.16s ease;
+    }
+    .primary{
+      background:linear-gradient(180deg,#ff8655,#ef6e3d);color:#17100d;
+      box-shadow:0 12px 32px rgba(255,122,69,.18)
+    }
+    .primary:hover{transform:translateY(-1px);filter:brightness(1.04)}
+    .secondary{background:#15151b;border:1px solid var(--stroke);color:#e4e6eb}
+    .secondary:hover{background:#1a1a20}
+    .note{
+      margin:26px auto 0;padding-top:22px;border-top:1px solid #202027;
+      color:var(--muted2);font-size:12px;line-height:1.65;max-width:500px
+    }
+    .small{margin-top:20px;font-size:11px;color:#666b78}
+    .small a{color:#aeb3c0}
+    @media(max-width:540px){.card{padding:30px 22px;border-radius:20px}}
+  </style>
+</head>
+<body>
+  <main class="card">
+    <div class="brand">
+      <img src="../assets/lottopulse-icon.webp" alt="">
+      <span>LottoPulse</span>
+    </div>
+
+    <div class="check">✓</div>
+    <h1>Pagamento completato.</h1>
+    <p class="lead">
+      LottoPulse è tuo. Ora puoi installare l'estensione dal Chrome Web Store e iniziare subito a consultare le statistiche.
+    </p>
+
+    <div class="actions">
+      <a class="btn primary" href="https://chromewebstore.google.com/detail/lottopulse/iohmpiampekjmbgnghdcdmflpkhjbial" target="_blank" rel="noopener">
+        Installa LottoPulse
+      </a>
+      <a class="btn secondary" href="../">
+        Torna al sito
+      </a>
+    </div>
+
+    <div class="note">
+      Compatibile con Chrome e browser Chromium che supportano le estensioni del Chrome Web Store.
+      LottoPulse mostra statistiche descrittive basate su estrazioni passate e non aumenta le probabilità di vincita.
+    </div>
+
+    <div class="small">
+      <a href="../privacy/">Privacy Policy</a>
+    </div>
+  </main>
+</body>
+</html>
